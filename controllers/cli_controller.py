@@ -1,6 +1,10 @@
+from datetime import date
+
 from flask import Blueprint
+
 from init import db, bcrypt
 from models.user import User
+from models.card import Card
 
 db_commands = Blueprint('db', __name__)
 
@@ -30,6 +34,18 @@ def seed_page():
   ]
   
   db.session.add_all(users)
+  
+  cards = [
+    Card(
+      title="Comment",
+      description="Comment Desc",
+      date=date.today(),
+      user=users[0]
+    )
+  ]
+  
+  db.session.add_all(cards)
+  
   db.session.commit()
   
   print("Comment Page Seeded")
