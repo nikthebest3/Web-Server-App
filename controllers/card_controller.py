@@ -52,7 +52,7 @@ def delete_card(commentcard_id):
   else:
     return {"error": f"Comment with id {commentcard_id} not found"}, 404
   
-@cards_bp.route('/<int:commentcard_id>', methods=["PUT, PATCH"])
+@cards_bp.route('/<int:commentcard_id>', methods=['PUT', 'PATCH'])
 def update_commentcard(commentcard_id):
   body_data = request.get_json()
   stmt = db.select(Card).filter_by(id=commentcard_id)
