@@ -45,10 +45,6 @@ def create_commentcard():
 @jwt_required()
 def delete_card(commentcard_id):
   
-  #is_admin = users_admin_status()
-  #if not is_admin:
-    #return {"error": "Not authorised to delete a comment"}, 403
-  
   stmt = db.select(Card).where(Card.id == commentcard_id)
   card = db.session.scalar(stmt)
   
