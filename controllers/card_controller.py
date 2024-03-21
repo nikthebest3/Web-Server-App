@@ -28,7 +28,7 @@ def get_one_card(commentcard_id):
 @cards_bp.route('/', methods=["POST"])
 @jwt_required()
 def create_commentcard():
-  body_data = request.get_json()
+  body_data = card_schema.load(request.get_json())
   card = Card(
     title = body_data.get('title'),
     description = body_data.get('description'),

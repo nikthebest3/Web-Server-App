@@ -1,6 +1,7 @@
-from init import db, ma
-from marshmallow import fields 
+from marshmallow import fields
+from marshmallow.validate import Length
 
+from init import db, ma
 class Card(db.Model):
   __tablename__ = "comment-card"
   
@@ -15,6 +16,8 @@ class Card(db.Model):
   user = db.relationship('User', back_populates='cards')
   
 class CardSchema(ma.Schema):
+  
+  title = fields.String(required=True, validate=Length(min=2, error="Please enter a title that is atleast 2 characters long"))
   
   user = fields.Nested('UserSchema', only = ['name', 'email'])
   
