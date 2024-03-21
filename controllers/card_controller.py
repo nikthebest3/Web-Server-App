@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from init import db
 from models.card import Card, cards_schema, card_schema
+from models.user import User
 
 cards_bp = Blueprint('cards', __name__, url_prefix='/cards')
 
@@ -41,11 +42,19 @@ def create_commentcard():
   return card_schema.dump(card), 201
 
 @cards_bp.route("/<int:commentcard_id>", methods=['DELETE'])
+@jwt_required()
 def delete_card(commentcard_id):
+  
+  #is_admin = users_admin_status()
+  #if not is_admin:
+    #return {"error": "Not authorised to delete a comment"}, 403
+  
   stmt = db.select(Card).where(Card.id == commentcard_id)
   card = db.session.scalar(stmt)
   
   if card:
+    if str(card.user_id) != get_jwt_identity():
+      return {"error": "Only the owner can delete the comment"}, 403
     db.session.delete(card)
     db.session.commit()
     return {"message": f"Comment '{card.title}' has been deleted"}
@@ -53,15 +62,27 @@ def delete_card(commentcard_id):
     return {"error": f"Comment with id {commentcard_id} not found"}, 404
   
 @cards_bp.route('/<int:commentcard_id>', methods=['PUT', 'PATCH'])
+@jwt_required()
 def update_commentcard(commentcard_id):
+  
   body_data = request.get_json()
+  
   stmt = db.select(Card).filter_by(id=commentcard_id)
   card = db.session.scalar(stmt)
   
   if card:
+    if str(card.user_id) != get_jwt_identity():
+      return {"error": "Only the owner can edit the comment"}, 403
     card.title = body_data.get('title') or card.title 
     card.description = body_data.get('description') or card.description
     db.session.commit()
     return card_schema.dump(card)
   else:
     return {"error": f"Comment with id {commentcard_id} not found"}, 404
+  
+
+def users_admin_status():
+  user_id = get_jwt_identity()
+  stmt = db.select(User).filter_by(id=user_id)
+  user = db.session.scalar(stmt)
+  return user.is_admin
